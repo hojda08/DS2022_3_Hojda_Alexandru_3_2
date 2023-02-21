@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  chatserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9090:9090"
+    environment:
+      - DISPLAY=${DISPLAY}
+      - VNC_PASSWORD=${VNC_PASSWORD}
+    command: ["bash", "-c", "xvfb-run --server-num=0 --listen-tcp --server-args='-screen 0 1024x768x24 -ac' java -jar target/chatClientGrpc-1.0-SNAPSHOT.jar"]
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    depends_on:
+      - vncserver
+
+  vncserver:
+    image: consol/ubuntu-xfce-vnc
+    environment:
+      VNC_PASSWORD: ${VNC_PASSWORD}
+    ports:
+      - "5901:5901"
+    security_opt:
+      - "seccomp:unconfined"
+    shm_size: 256m
